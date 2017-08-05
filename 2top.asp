@@ -1,0 +1,1 @@
+<a href="javascript:;" class="btu-to-top"><img src="style/images/top.jpg" width="76" height="25" border="0"></a>
