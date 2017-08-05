@@ -1,30 +1,43 @@
-<%
-Dim query, a, x, temp
-    action = "http://" & Request.ServerVariables("HTTP_HOST") & Request.ServerVariables("SCRIPT_NAME")
-    query = Split(Request.ServerVariables("QUERY_STRING"), "&")
-   
-For Each x In query
-	a = Split(x, "=")
-	If StrComp(a(0), "page", vbTextCompare) <> 0 Then
-		temp = temp & a(0) & "=" & a(1) & "&"
-	End If
-Next
-%>
 <div class="paging_box">
 <div class="paging">
+
 <%if page<=1 then%>
-<span>首页</span>
-<span>上一页</span>
-<%else%>   
-<a href="?<%=temp%>page=1">首页</A>
-<a href="?<%=temp%>page=<%=Page-1%>">上一页</A>
+<span class="btn btn-mini disabled">首页</span>
+<span class="btn btn-mini disabled">上一页</span>
+<%else%>
+<A class="btn btn-mini" href="<%=URI.reUrl("page=1")%>">首页</A>
+<A class="btn btn-mini" href="<%=URI.reUrl("page="&(page-1))%>">上一页</A>
 <%end if%>
-	
-<%if page>=maxpage then%>
-<span>下一页</span>
-<span>尾页</span>
+<%
+dim pageFrom,pageTo
+if (page - pageAdds)<=0 then
+   pageFrom = 1
+else
+   pageFrom = page - pageAdds
+end if
+if (page + pageAdds)>=pageCounts then
+   pageTo = pageCounts
+else
+   pageTo = page + pageAdds
+end if
+
+for pageI = pageFrom to pageTo
+    if page = pageI then
+%>
+<A class="btn btn-mini active" href="<%=URI.reUrl("page="&pageI)%>"><%=pageI%></A>
+<%else%>
+<A class="btn btn-mini" href="<%=URI.reUrl("page="&pageI)%>"><%=pageI%></A>
+<%
+    end if
+next
+%>
+<%if page>=pageCounts then%>
+<span class="btn btn-mini disabled">下一页</span>
+<span class="btn btn-mini disabled">尾页</span>   
 <%else%>   
-<a href="?<%=temp%>page=<%=Page+1%>">下一页</A>
-<a href="?<%=temp%>page=<%=maxpage%>">尾页</A>    
+<A class="btn btn-mini" href="<%=URI.reUrl("page="&(page+1))%>">下一页</A>
+<A class="btn btn-mini" href="<%=URI.reUrl("page="&pageCounts)%>">尾页</A>    
 <%end if%>
+<A class="btn btn-mini disabled"><!--页次：<%=page%>/<%=pageCounts%>页 -->共 <%=allCounts%> 条记录</A>
+
 </div></div>

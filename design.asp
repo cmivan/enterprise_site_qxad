@@ -1,8 +1,9 @@
 <!--#include file="top.asp"-->
+<!--#include file="system/helpers/design_helper.asp"-->
 <%
   dim this_title,this_note,this_typeB_id,this_sql
   this_typeB_id = request.QueryString("typeB_id")
-  if isnumeric(this_typeB_id)=false or this_typeB_id="" then
+  if text.isNum(this_typeB_id)=false then
      this_sql = "select top 5 * from design order by order_id desc,id desc"
   else
      this_sql = "select top 5 * from design where typeB_id=" & this_typeB_id & " order by order_id desc,id desc"
@@ -19,83 +20,97 @@
   set rs=nothing
 
   
-  page_title = "广州4A广告设计|东莞广告设计|相关案例" & this_note & " - " & site_cname
+  page_title = "广州广告设计|东莞广告设计|相关案例" & this_note & " - " & site_title
   page_keywords = site_keywords
   page_description = site_description & "，" & this_note
 %>
 <!--#include file="header.asp"-->
-<script language="javascript" src="style/js/jquery.lazyload.min.js"></script>
-<script language="javascript">
-$(function(){
-	var $imgObj = $("img.lazy");
-	var $imgSrc = null;
-	$imgObj.each(function(){
-		$imgSrc = $(this).attr('src');
-		$(this).attr('src','style/images/design-load.jpg')
-		$(this).attr('data-original',$imgSrc);
-	});
-	//$imgObj.lazyload({effect : "fadeIn",container: $(".body-right")});
-	$imgObj.lazyload({container: $(".body-right")});
-});
-</script>
+<script type="text/javascript" language="javascript" src="style/js/jquery.lazyload.js"></script>
 <body>
-<div class="body-left"><!--#include file="nav.asp"--></div>
+<div id="body_main">
+<!--#include file="bodyTop.asp"-->
+
+<div class="body-left"><!--#include file="left.asp"--></div>
 <div class="body-right">
 
- <div class="main_body_width main_body_top2">
-    <div class="main-body-left"><!--#include file="design_type.asp"--></div>
-    <div class="main-body-right">
-    
+<div class="main_body_width main_body_top2">
+
+<div class="main-body-right">
+<%
+design_type_note = articles.viewKey("design_type",this_typeB_id,"content")
+if design_type_note then response.Write("<div class='design_type_note'><div>"&design_type_note&"</div></div>")
+%>
+<ul id="case_list">
 <%
 '//作品&案例
-dim caseNum
-    caseNum=0
-	
-dim page,maxpage,iCount
-set myrs=New getList
-	myrs.cOpen "design",12,true
- if not myrs.cEof then
- do while not myrs.cEof
-	 caseNum = caseNum+1
+set myrs = New data
+    if text.isNum(this_typeB_id) then myrs.where "typeB_id",this_typeB_id
+	myrs.where "ok",1
+	myrs.where_NULL "typeB_id<>23 and typeB_id<>27 and (id in (2951,2902,2929,2921,2953,2918) or id>2918)"
+	myrs.orderBy "order_id","asc"
+	myrs.orderBy "id","desc"
+	myrs.open "design",8,true
+ if not myrs.eof then
+ do while not myrs.eof
 %>
-<table border="0" cellpadding="10">
-  <tr>
-    <td class="content-right"><div class="design-title"><a href="design_view.asp?id=<%=myrs.rs("id")%>" target="_blank">案例名称：<%=myrs.rs("title")%></a></div></td>
-  </tr><tr>
-    <td valign="top">
-      <a href="design_view.asp?id=<%=myrs.rs("id")%>" target="_blank" title="<%=myrs.rs("title")%>"><img class="lazy" alt="<%=myrs.rs("title")%>" src="<%=myrs.rs("small_pic")%>" width="559" border="0"></a>
-      <br>
-      <%=myrs.rs("note")%>
-      <br>
-      <a href="design_view.asp?id=<%=myrs.rs("id")%>" title="查看【<%=myrs.rs("title")%>】的详细内容" target="_blank">&gt; More &lt;</a><br>
-    </td></tr>
-  <tr>
-  <td>
-    <br>
-    <!--#include file="2top.asp"-->
-    &nbsp;&nbsp;
-    <span class="yingwen"><a target="_blank" href="http://sighttp.qq.com/authd?IDKEY=b96572d72b449fadeb809b5bcec61a2f2082ae95cdbba25e"><img src="http://wpa.qq.com/pa?p=2:1185609475:41" alt="在线咨询" border="0" align="top" title="在线咨询"></a></span>
-    <br></td>
-  </tr>
-</table>
-<br>
+<li>
+<p class="design-title">
+<a href="design_view.asp?id=<%=myrs.rs("id")%>" target="_blank"><%=myrs.rs("title")%></a>
+<%'=myrs.rs("note")%>
+</p>
+<div class="clear">&nbsp;</div>
+<br />
+<%=myrs.rs("content_view")%>
+<br />
+<%=ImgLazyload(myrs.rs("content"))%>
+
+<div class="clear">&nbsp;</div>
+<br><br><br>
+<div class="hr"></div>
+<br><br><br>
+
+<div class="clear">&nbsp;</div>
+</li>
+
+
+
 <%
-  myrs.cNext:loop:myrs.cClose
+  myrs.nexts:loop:myrs.close
+%>
+<%
+'page
+'maxPage
+'allCount
+dim page,pageCounts,allCounts,pageAdds
+page       = myrs.page
+pageCounts = myrs.pageCounts
+allCounts  = myrs.allCounts
+pageAdds = 2
 %>
 <table width="100%"  border="0" cellpadding="10">
   <tr>
-    <td align="left" class="paging_main"><!--#include file="public_paging.asp"--></td>
+    <td align="left"><!--#include file="public_paging.asp"--></td>
   </tr>
 </table>
 <% else %>
  <div class="content-none"><a href="design.asp">这里没有作品哦，去看看其他的吧！</a></div>
 <%end if%>
 
-    <div class="clear"></div>
-    <!--#include file="footer.asp"-->
+</ul>
 
-    </div>
- </div>
+
+
+
+<div class="clear"></div>
+<!--#include file="footer.asp"-->
+    
+
 </div>
+
+<!--#include file="design_type.asp"-->
+
+</div></div>
+</div>
+
 </body>
 </html>
